@@ -43,7 +43,10 @@ class AmigaPngCreator:
             )
             return None
 
-        pixels, mask = self.bpl_reader.decode_pixels()
+        pixels, mask = self.bpl_reader.decode_pixels(
+            sprite_width=self.sprite_width,
+            sprite_height=self.sprite_height
+        )
 
         if pixels is None:
             raise ValueError("Failed to decode bitplane data")
