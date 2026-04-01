@@ -62,6 +62,9 @@ def main():
         console.print(
             "  [green]--pal-bits 12|24[/green]   - Bit depth of the .pal file: 12 (default) or 24."
         )
+        console.print(
+            "  [green]--gen_mask[/green]         - With --generate_png, also creates a 2-color PNG of the mask."
+        )
         console.print()
         console.print("[bold cyan]Examples:[/bold cyan]")
         console.print(
@@ -69,6 +72,9 @@ def main():
         )
         console.print(
             "[dim]  python amiga_reader.py --generate_png assets/packman_tiles --width 320 --height 320 --mask[/dim]"
+        )
+        console.print(
+            "[dim]  python amiga_reader.py --generate_png assets/packman_tiles --width 320 --height 320 --mask --gen_mask[/dim]"
         )
         console.print(
             "[dim]  python amiga_reader.py --generate_png --bpl file.bpl --pal file.pal --width 320 --height 320 --bits 4 --mask --output out.png[/dim]"
@@ -101,6 +107,7 @@ def main():
     pal_bits = 12  # default: Amiga 12-bit palette
     sprite_width = None
     sprite_height = None
+    gen_mask = False
     scale = 1  # default: no scaling
 
     def _get_int_arg(name):
@@ -191,6 +198,9 @@ def main():
             sys.exit(1)
         scale = v
 
+    if "--gen_mask" in sys.argv:
+        gen_mask = True
+
     # Validate required args
     if width is None or height is None:
         console.print(
@@ -226,6 +236,7 @@ def main():
             pal_bits=pal_bits,
             sprite_width=sprite_width,
             sprite_height=sprite_height,
+            gen_mask=gen_mask,
             scale=scale,
         )
 

@@ -25,6 +25,7 @@ class AmigaFileAnalyzer:
         pal_bits=12,
         sprite_width=None,
         sprite_height=None,
+        gen_mask=False,
         scale=1,
     ):
         """Initialize the analyzer
@@ -41,6 +42,7 @@ class AmigaFileAnalyzer:
             pal_bits:      Bit depth of the .pal file — 12 (default) or 24 (--pal-bits).
             sprite_width:  Tile width in pixels for label overlay (--sprite_width).
             sprite_height: Tile height in pixels for label overlay (--sprite_height).
+            gen_mask:      If True, also generate a mask PNG (--gen_mask).
         """
         self.console = Console()
         self.bpl_reader = None
@@ -48,6 +50,7 @@ class AmigaFileAnalyzer:
         self.mode = mode
         self.sprite_width = sprite_width
         self.sprite_height = sprite_height
+        self.gen_mask = gen_mask
         self.scale = scale
 
         if pal_file:
@@ -198,4 +201,11 @@ class AmigaFileAnalyzer:
             sprite_height=self.sprite_height,
             scale=self.scale,
         )
-        return creator.generate_png(output_path=output_path)
+        result_path = creator.generate_png(output_path=output_path)
+
+        if result_path and self.gen_mask:
+            # The output path for the mask is handled by the creator, which will
+            # generate a name like 'basename_mask.png'.
+            creator.generate_mask_png()
+
+        return result_path

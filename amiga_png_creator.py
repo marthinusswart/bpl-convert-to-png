@@ -8,11 +8,11 @@ class AmigaPngCreator:
     """Creates a PNG image from decoded Amiga bitplane and palette data."""
 
     def __init__(
-        self, bpl_reader, pal_reader, sprite_width=None, sprite_height=None, scale=1
+        self, bpl_reader, pal_reader=None, sprite_width=None, sprite_height=None, scale=1
     ):
         """Args:
         bpl_reader:    An AmigaBitplaneReader instance with decoded pixel data.
-        pal_reader:    An AmigaPaletteReader instance with palette colors.
+        pal_reader:    An AmigaPaletteReader instance with palette colors (optional).
         sprite_width:  Tile width in pixels for label overlay (optional).
         sprite_height: Tile height in pixels for label overlay (optional).
         scale:         Output scale factor: 1 (default), 2, 3, or 4.
@@ -43,10 +43,7 @@ class AmigaPngCreator:
             )
             return None
 
-        pixels, mask = self.bpl_reader.decode_pixels(
-            sprite_width=self.sprite_width,
-            sprite_height=self.sprite_height
-        )
+        pixels, mask = self.bpl_reader.decode_pixels()
 
         if pixels is None:
             raise ValueError("Failed to decode bitplane data")
@@ -100,6 +97,65 @@ class AmigaPngCreator:
             self.console.print(
                 f"[dim]  Tile labels: {tiles_x}×{tiles_y} grid ({self.sprite_width}×{self.sprite_height} px/tile)[/dim]"
             )
+        if self.scale > 1:
+            self.console.print(f"[dim]  Scale: {self.scale}x[/dim]")
+
+        return output_path
+
+    def generate_mask_png(self, output_path=None):
+        """Generates a 2-color (black/white) PNG from the mask data.
+
+        Args:
+            output_path: Output PNG path. If None, uses bpl filename with _mask.png suffix.
+
+        Returns:
+            Path to the generated PNG file, or None if inputs are unavailable.
+        """
+        if not self.bpl_reader:
+            self.console.print("[bold red]Error:[/bold red] No BPL file loaded.")
+            return None
+
+        if not self.bpl_reader.has_mask:
+            self.console.print(
+                "[yellow]Skipping mask PNG generation — BPL file has no mask data.[/yellow]"
+            )
+            return None
+
+        _, mask = self.bpl_reader.decode_pixels()
+
+        if mask is None:
+            self.console.print(
+                "[yellow]Skipping mask PNG generation — BPL file has no mask data.[/yellow]"
+            )
+            return None
+
+        if output_path is None:
+            base_name = self.bpl_reader.filepath.stem
+            output_path = self.bpl_reader.filepath.with_name(f"{base_name}_mask.png")
+        else:
+            output_path = Path(output_path)
+
+        width = self.bpl_reader.width
+        height = self.bpl_reader.height
+
+        # Create a grayscale image ('L' mode). Mask data is 0 for transparent (black)
+        # and 255 for opaque (white).
+        img = Image.new("L", (width, height))
+        flat_mask = [pixel for row in mask for pixel in row]
+        img.putdata(flat_mask)
+
+        if self.scale > 1:
+            img = img.resize((width * self.scale, height * self.scale), Image.NEAREST)
+
+        img.save(output_path)
+
+        out_w = width * self.scale
+        out_h = height * self.scale
+        self.console.print(
+            f"[green]✓ Mask PNG generated successfully:[/green] {output_path}"
+        )
+        self.console.print(f"[dim]  Dimensions: {out_w}x{out_h}[/dim]")
+        self.console.print(f"[dim]  Format: 2-color grayscale (mask only)[/dim]")
         if self.scale > 1:
             self.console.print(f"[dim]  Scale: {self.scale}x[/dim]")
 

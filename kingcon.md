@@ -651,3 +651,22 @@ key classes and structures:
 | `BuildCutoutList()`            | Determines cutout regions for all modes                        |
 | `SaveFiles()`                  | Writes all output files                                        |
 | `SavePreviewImage()`           | Writes the `_preview.TGA` composite                            |
+
+# How does KingCon know to create the correct masks without the sprite size?
+It actually doesn't need to know about your sprites at all! Here is how the magic works:
+
+Global Mask Generation: When you pass the -Mask flag, KingCon looks at the entire 320x320 image. By default, it looks for Palette Index 0 (your background color). Every single pixel in the 320x320 image that matches the background color gets a 0 (transparent) in the mask plane. Every other pixel gets a 1 (opaque).
+Interleaved Storage: Because you used -Interleaved -Mask, KingCon weaves this massive 320x320 mask directly into the Amiga bitplane data. Every single scanline of your 320x320 image will contain the color data immediately followed by the mask data for that exact line.
+How the Amiga uses it: On the Amiga, programmers use the Blitter chip to draw graphics. When they want to draw tile (1, 2), they tell the Blitter: "Go to X=16, Y=32 in this big 320x320 image, grab a 16x16 block of pixels, and grab the mask that is interleaved right next to it."
+Because the mask is generated perfectly for the entire sheet, any 16x16 chunk you cut out of it will naturally have the exact correct mask attached to it!
+
+What about your Python script?
+Your Python script works the exact same way as the Amiga! It will decode the entire 320x320 image (and its perfect mask) into one big PNG.
+
+Then, because you pass --sprite_width 16 --sprite_height 16 to amiga_reader.py, your Python code will simply draw lines and numbers over top of that decoded image to show you exactly where the 16x16 boundaries are.
+
+# This will now work perfectly!
+python amiga_reader.py --generate_png assets/packman_tiles --width 320 --height 320 --mask --sprite_width 16 --sprite_height 16
+
+---
+
