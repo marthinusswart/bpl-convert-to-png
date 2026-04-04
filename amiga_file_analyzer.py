@@ -27,6 +27,7 @@ class AmigaFileAnalyzer:
         sprite_height=None,
         gen_mask=False,
         scale=1,
+        output_dir=None,
     ):
         """Initialize the analyzer
 
@@ -43,6 +44,7 @@ class AmigaFileAnalyzer:
             sprite_width:  Tile width in pixels for label overlay (--sprite_width).
             sprite_height: Tile height in pixels for label overlay (--sprite_height).
             gen_mask:      If True, also generate a mask PNG (--gen_mask).
+            output_dir:    Optional output directory for generated files.
         """
         self.console = Console()
         self.bpl_reader = None
@@ -52,6 +54,7 @@ class AmigaFileAnalyzer:
         self.sprite_height = sprite_height
         self.gen_mask = gen_mask
         self.scale = scale
+        self.output_dir = output_dir
 
         if pal_file:
             self.pal_reader = AmigaPaletteReader(pal_file, bits=pal_bits)
@@ -108,7 +111,13 @@ class AmigaFileAnalyzer:
             "Format",
             f"{layout} (kingcon {'-Interleaved' if info['interleaved'] else 'no -Interleaved'})",
         )
-        table.add_row("Image Dimensions", f"{info['width']} x {info['height']} pixels")
+        width, height = info["width"], info["height"]
+        if width is not None and height is not None:
+            dim_text = f"{width} x {height} pixels"
+        else:
+            dim_text = "[yellow]Undetermined (try providing --width and --height)[/yellow]"
+
+        table.add_row("Image Dimensions", dim_text)
         table.add_row("Bytes per Scanline", f"{info['bytes_per_line']} bytes/plane")
         table.add_row(
             "Color Bitplanes", f"{info['depth']} planes (-Format={info['depth']})"
@@ -185,11 +194,8 @@ class AmigaFileAnalyzer:
         self.console.print(color_table)
         self.console.print()
 
-    def generate_png(self, output_path=None):
+    def generate_png(self):
         """Generate a PNG file from BPL and PAL data.
-
-        Args:
-            output_path: Output PNG path. If None, uses bpl filename with .png extension.
 
         Returns:
             Path to the generated PNG file, or None if inputs are unavailable.
@@ -200,8 +206,9 @@ class AmigaFileAnalyzer:
             sprite_width=self.sprite_width,
             sprite_height=self.sprite_height,
             scale=self.scale,
+            output_dir=self.output_dir,
         )
-        result_path = creator.generate_png(output_path=output_path)
+        result_path = creator.generate_png()
 
         if result_path and self.gen_mask:
             # The output path for the mask is handled by the creator, which will

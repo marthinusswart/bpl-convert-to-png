@@ -45,18 +45,60 @@ class AmigaBitplaneReader:
         with open(self.filepath, "rb") as f:
             self.data = f.read()
         self.file_size = len(self.data)
-        
+
+        if self.width is None and self.height is None:
+            self._autodetect_dimensions()
+
         # Validate file size against requested dimensions
-        width_bytes = ((self.width + 15) // 16) * 2
-        expected_size = width_bytes * self.height * self.total_planes
-        if self.file_size > 0 and self.file_size < expected_size:
-            raise ValueError(
-                f"File is too small! The .bpl file is only {self.file_size} bytes, "
-                f"but a {self.width}x{self.height} image with {self.total_planes} total planes "
-                f"requires at least {expected_size} bytes.\n\n"
-                f"Hint: If you generated this with KingCon using '-W=16 -H=16', KingCon treated those "
-                f"as crop dimensions and ONLY exported a single 16x16 tile!"
+        if self.width is not None and self.height is not None:
+            width_bytes = ((self.width + 15) // 16) * 2
+            expected_size = width_bytes * self.height * self.total_planes
+            if self.file_size > 0 and self.file_size != expected_size:
+                raise ValueError(
+                    f"File size mismatch! The .bpl file is {self.file_size} bytes, "
+                    f"but a {self.width}x{self.height} image with {self.total_planes} total planes "
+                    f"requires exactly {expected_size} bytes.\n\n"
+                    "Hint: Check your --width, --height, --bits, and --mask parameters."
+                )
+
+    def _autodetect_dimensions(self):
+        """Attempt to autodetect image dimensions from file size.
+
+        This is a heuristic and may not be accurate for all files. It works best
+        for common Amiga screen and sprite widths.
+        """
+        if self.total_planes == 0 or self.file_size == 0:
+            return
+
+        if self.file_size % self.total_planes != 0:
+            # File size isn't a multiple of total planes, so parameters are likely wrong.
+            return
+
+        single_plane_size = self.file_size // self.total_planes
+
+        # List of common Amiga widths (multiples of 16 are common).
+        # We check a range to be more flexible.
+        possible_widths = sorted(
+            list(
+                set(
+                    [16, 32, 64, 128, 160, 256, 320, 352, 640]
+                    + list(range(16, 385, 16))
+                )
             )
+        )
+
+        found_dims = []
+        for w in possible_widths:
+            width_bytes = ((w + 15) // 16) * 2
+            if width_bytes > 0 and single_plane_size % width_bytes == 0:
+                h = single_plane_size // width_bytes
+                if h > 0:
+                    found_dims.append((w, h))
+
+        if found_dims:
+            # Heuristic: pick the most "square-like" dimensions.
+            best_dim = min(found_dims, key=lambda dim: abs(dim[0] - dim[1]))
+            self.width, self.height = best_dim
 
     def get_summary(self):
         """Get summary information about the bitplane"""
@@ -70,7 +112,9 @@ class AmigaBitplaneReader:
             "max_colors": max_colors,
             "has_mask": self.has_mask,
             "interleaved": self.interleaved,
-            "bytes_per_line": ((self.width + 15) // 16) * 2 if self.width > 0 else 0,
+            "bytes_per_line": ((self.width + 15) // 16) * 2
+            if self.width is not None and self.width > 0
+            else 0,
             "total_planes": self.total_planes,
         }
 
@@ -96,7 +140,7 @@ class AmigaBitplaneReader:
 
         Returns a 2D list of pixel indices [y][x] and optionally mask data.
         """
-        if self.width == 0 or self.height == 0:
+        if not self.width or not self.height:
             return None, None
 
         width_bytes = ((self.width + 15) // 16) * 2

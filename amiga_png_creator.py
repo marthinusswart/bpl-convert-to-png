@@ -8,7 +8,13 @@ class AmigaPngCreator:
     """Creates a PNG image from decoded Amiga bitplane and palette data."""
 
     def __init__(
-        self, bpl_reader, pal_reader=None, sprite_width=None, sprite_height=None, scale=1
+        self,
+        bpl_reader,
+        pal_reader=None,
+        sprite_width=None,
+        sprite_height=None,
+        scale=1,
+        output_dir=None,
     ):
         """Args:
         bpl_reader:    An AmigaBitplaneReader instance with decoded pixel data.
@@ -16,19 +22,18 @@ class AmigaPngCreator:
         sprite_width:  Tile width in pixels for label overlay (optional).
         sprite_height: Tile height in pixels for label overlay (optional).
         scale:         Output scale factor: 1 (default), 2, 3, or 4.
+        output_dir:    Optional output directory for generated files.
         """
         self.bpl_reader = bpl_reader
         self.pal_reader = pal_reader
         self.sprite_width = sprite_width
         self.sprite_height = sprite_height
         self.scale = scale
+        self.output_dir = output_dir
         self.console = Console()
 
-    def generate_png(self, output_path=None):
+    def generate_png(self):
         """Generate a PNG file from BPL and PAL data.
-
-        Args:
-            output_path: Output PNG path. If None, uses bpl filename with .png extension.
 
         Returns:
             Path to the generated PNG file, or None if inputs are unavailable.
@@ -50,10 +55,13 @@ class AmigaPngCreator:
 
         palette_colors = self.pal_reader.colors
 
-        if output_path is None:
-            output_path = self.bpl_reader.filepath.with_suffix(".png")
+        base_path = self.bpl_reader.filepath
+        if self.output_dir:
+            output_dir_path = Path(self.output_dir)
+            output_dir_path.mkdir(parents=True, exist_ok=True)
+            output_path = output_dir_path / base_path.with_suffix(".png").name
         else:
-            output_path = Path(output_path)
+            output_path = base_path.with_suffix(".png")
 
         width = self.bpl_reader.width
         height = self.bpl_reader.height
@@ -102,11 +110,8 @@ class AmigaPngCreator:
 
         return output_path
 
-    def generate_mask_png(self, output_path=None):
+    def generate_mask_png(self):
         """Generates a 2-color (black/white) PNG from the mask data.
-
-        Args:
-            output_path: Output PNG path. If None, uses bpl filename with _mask.png suffix.
 
         Returns:
             Path to the generated PNG file, or None if inputs are unavailable.
@@ -129,11 +134,14 @@ class AmigaPngCreator:
             )
             return None
 
-        if output_path is None:
-            base_name = self.bpl_reader.filepath.stem
-            output_path = self.bpl_reader.filepath.with_name(f"{base_name}_mask.png")
+        base_path = self.bpl_reader.filepath
+        mask_filename = f"{base_path.stem}_mask.png"
+        if self.output_dir:
+            output_dir_path = Path(self.output_dir)
+            output_dir_path.mkdir(parents=True, exist_ok=True)
+            output_path = output_dir_path / mask_filename
         else:
-            output_path = Path(output_path)
+            output_path = base_path.with_name(mask_filename)
 
         width = self.bpl_reader.width
         height = self.bpl_reader.height

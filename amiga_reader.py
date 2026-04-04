@@ -30,26 +30,34 @@ def main():
 
     if len(sys.argv) < 2:
         console.print(
-            "[yellow]Usage: python amiga_reader.py <mode> <base_name> [options][/yellow]"
+            "[yellow]Usage: python amiga_reader.py <mode> <base_name|file_options> [options][/yellow]"
         )
         console.print()
         console.print("[bold cyan]Modes:[/bold cyan]")
         console.print(
-            "  [green]--display_details[/green]  - Display file details and analysis"
+            "  [green]--display_details[/green]  - Display file details and analysis."
         )
         console.print(
-            "  [green]--generate_png[/green]     - Generate PNG from BPL and PAL files"
+            "  [green]--generate_png[/green]     - Generate PNG from BPL and PAL files."
+        )
+        console.print()
+        console.print("[bold cyan]File Input (provide one of the following):[/bold cyan]")
+        console.print(
+            "  [green]<base_name>[/green]          - Base name for .bpl/.pal files (e.g., 'assets/image')."
+        )
+        console.print(
+            "  [green]--bpl FILE --pal FILE[/green] - Explicit paths to .bpl and .pal files."
         )
         console.print()
         console.print("[bold cyan]Required for BPL decoding:[/bold cyan]")
         console.print(
-            "  [green]--width N[/green]          - Image width in pixels (e.g. 320)"
+            "  [green]--width N, --height N[/green]  - Image dimensions. Required for PNG generation."
         )
         console.print(
-            "  [green]--height N[/green]         - Image height in pixels (e.g. 320)"
+            "                         [dim](Optional for --display_details; will attempt auto-detection)[/dim]"
         )
         console.print()
-        console.print("[bold cyan]Options:[/bold cyan]")
+        console.print("[bold cyan]BPL/PAL Options:[/bold cyan]")
         console.print(
             "  [green]--bits N[/green]           - Number of color bitplanes (default: 5 → 32 colors)."
         )
@@ -57,27 +65,41 @@ def main():
             "  [green]--mask[/green]             - BPL has a mask plane (default: off)."
         )
         console.print(
-            "  [green]--no-interleaved[/green]   - BPL is non-interleaved (default: interleaved)."
+            "  [green]--no-interleaved[/green]   - BPL is non-interleaved (default: is interleaved)."
         )
         console.print(
             "  [green]--pal-bits 12|24[/green]   - Bit depth of the .pal file: 12 (default) or 24."
         )
+        console.print()
+        console.print("[bold cyan]PNG Output Options:[/bold cyan]")
         console.print(
-            "  [green]--gen_mask[/green]         - With --generate_png, also creates a 2-color PNG of the mask."
+            "  [green]--output DIR[/green]         - Optional output directory for generated PNGs."
+        )
+        console.print(
+            "  [green]--gen_mask[/green]         - Also create a 2-color PNG of the mask."
+        )
+        console.print(
+            "  [green]--scale N[/green]          - Scale output PNG by 2, 3, or 4."
+        )
+        console.print(
+            "  [green]--sprite_width N[/green]   - Draw tile grid overlay with this tile width."
+        )
+        console.print(
+            "  [green]--sprite_height N[/green]  - Draw tile grid overlay with this tile height."
         )
         console.print()
         console.print("[bold cyan]Examples:[/bold cyan]")
         console.print(
-            "[dim]  python amiga_reader.py --display_details assets/packman_tiles --width 320 --height 320[/dim]"
+            "[dim]  # Display details, auto-detecting dimensions for a sprite[/dim]"
         )
         console.print(
-            "[dim]  python amiga_reader.py --generate_png assets/packman_tiles --width 320 --height 320 --mask[/dim]"
+            "[dim]  python amiga_reader.py --display_details assets/pacman-sprite[/dim]"
         )
         console.print(
-            "[dim]  python amiga_reader.py --generate_png assets/packman_tiles --width 320 --height 320 --mask --gen_mask[/dim]"
+            "[dim]  # Generate a PNG with a tile grid overlay, scaled 2x, to a specific directory[/dim]"
         )
         console.print(
-            "[dim]  python amiga_reader.py --generate_png --bpl file.bpl --pal file.pal --width 320 --height 320 --bits 4 --mask --output out.png[/dim]"
+            "[dim]  python amiga_reader.py --generate_png assets/pacman_tiles --width 320 --height 320 --mask --sprite_width 16 --sprite_height 16 --scale 2 --output generated/[/dim]"
         )
         sys.exit(1)
 
@@ -98,7 +120,7 @@ def main():
 
     bpl_file = None
     pal_file = None
-    output_file = None
+    output_dir = None
     width = None
     height = None
     bits = 5  # default: 5 bitplanes → 32 colors
@@ -138,7 +160,7 @@ def main():
     if "--output" in sys.argv:
         output_idx = sys.argv.index("--output")
         if output_idx + 1 < len(sys.argv):
-            output_file = sys.argv[output_idx + 1]
+            output_dir = sys.argv[output_idx + 1]
 
     v = _get_int_arg("--width")
     if v is not None:
@@ -203,11 +225,18 @@ def main():
 
     # Validate required args
     if width is None or height is None:
-        console.print(
-            "[bold red]Error:[/bold red] --width and --height are required.\n"
-            "[dim]Example: --width 320 --height 320[/dim]"
-        )
-        sys.exit(1)
+        if mode == "generate":
+            console.print(
+                "[bold red]Error:[/bold red] --width and --height are required for --generate_png mode.\n"
+                "[dim]Example: --width 320 --height 320[/dim]"
+            )
+            sys.exit(1)
+        # For display mode, if one is provided, the other must be too.
+        elif width is not None or height is not None:
+            console.print(
+                "[bold red]Error:[/bold red] Please provide both --width and --height, or neither for auto-detection in display mode."
+            )
+            sys.exit(1)
 
     # If no explicit file flags, assume base name (second argument after mode)
     if not bpl_file and not pal_file:
@@ -238,12 +267,13 @@ def main():
             sprite_height=sprite_height,
             gen_mask=gen_mask,
             scale=scale,
+            output_dir=output_dir,
         )
 
         if mode == "display":
             analyzer.display_summary()
         elif mode == "generate":
-            analyzer.generate_png(output_path=output_file)
+            analyzer.generate_png()
 
     except FileNotFoundError as e:
         console.print(f"[bold red]Error:[/bold red] {e}", style="red")

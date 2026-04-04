@@ -84,3 +84,22 @@ For our 5-bitplane image, this means 5 identical mask blocks are added per scanl
 ... (Repeats for all 320 scanlines) ...
 
 Running Total: 400 bytes × 320 lines = 128,000 bytes
+```
+
+# Real Examples
+
+```shell
+python amiga_reader.py --generate_png bpl/pacman-Sprite-0004 --output converted --width 16 --height 16 --mask --scale 3 --sprite_width 16 --sprite_height 16
+```
+
+```shell
+python amiga_reader.py --generate_png bpl/pacman-Sprite-0003_shifted --output converted --width 32 --height 256 --mask --scale 3 --sprite_width 32 --sprite_height 16
+```
+
+```shell
+python amiga_reader.py --generate_png bpl/pacman-Sprite-0002_shifted_reverse --output converted --width 32 --height 256 --mask --scale 3 --sprite_width 32 --sprite_height 16
+```
+
+```shell
+python amiga_reader.py --generate_png bpl/pacman-Sprite-0001 --output converted --width 16 --height 16 --mask --scale 3 --sprite_width 16 --sprite_height 16
+```
