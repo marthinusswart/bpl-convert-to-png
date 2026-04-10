@@ -46,7 +46,7 @@ def main():
             "  [green]<base_name>[/green]          - Base name for .bpl/.pal files (e.g., 'assets/image')."
         )
         console.print(
-            "  [green]--bpl FILE --pal FILE[/green] - Explicit paths to .bpl and .pal files."
+            "  [green]--bpl FILE --pal FILE[/green] - Explicit paths to .bpl and .pal files (--pal or --palette)."
         )
         console.print()
         console.print("[bold cyan]Required for BPL decoding:[/bold cyan]")
@@ -152,8 +152,8 @@ def main():
         if bpl_idx + 1 < len(sys.argv):
             bpl_file = sys.argv[bpl_idx + 1]
 
-    if "--pal" in sys.argv:
-        pal_idx = sys.argv.index("--pal")
+    if "--pal" in sys.argv or "--palette" in sys.argv:
+        pal_idx = sys.argv.index("--pal") if "--pal" in sys.argv else sys.argv.index("--palette")
         if pal_idx + 1 < len(sys.argv):
             pal_file = sys.argv[pal_idx + 1]
 
@@ -238,18 +238,19 @@ def main():
             )
             sys.exit(1)
 
-    # If no explicit file flags, assume base name (second argument after mode)
-    if not bpl_file and not pal_file:
-        if len(sys.argv) < 3:
+    # If no explicit bpl file flag, assume base name (second argument after mode)
+    if not bpl_file:
+        if len(sys.argv) < 3 or sys.argv[2].startswith("--"):
             console.print(
-                "[bold red]Error:[/bold red] Missing base name or file paths",
+                "[bold red]Error:[/bold red] Missing base name or --bpl file path",
                 style="red",
             )
             sys.exit(1)
         base_name = sys.argv[2]
         bpl_file = f"{base_name}.bpl"
-        pal_path = Path(f"{base_name}.pal")
-        pal_file = str(pal_path) if pal_path.exists() else None
+        if not pal_file:
+            pal_path = Path(f"{base_name}.pal")
+            pal_file = str(pal_path) if pal_path.exists() else None
 
     # Create analyzer and execute based on mode
     try:
