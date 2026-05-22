@@ -17,9 +17,9 @@ from pathlib import Path
 
 from rich.console import Console
 
-from amiga_palette_reader import AmigaPaletteReader
-from amiga_bitplane_reader import AmigaBitplaneReader
-from amiga_file_analyzer import AmigaFileAnalyzer
+from amiga_reader.amiga_palette_reader import AmigaPaletteReader
+from amiga_reader.amiga_bitplane_reader import AmigaBitplaneReader
+from amiga_reader.amiga_file_analyzer import AmigaFileAnalyzer
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
 
     if len(sys.argv) < 2:
         console.print(
-            "[yellow]Usage: python amiga_reader.py <mode> <base_name|file_options> [options][/yellow]"
+            "[yellow]Usage: amiga-reader <mode> <base_name|file_options> [options][/yellow]"
         )
         console.print()
         console.print("[bold cyan]Modes:[/bold cyan]")
@@ -93,13 +93,13 @@ def main():
             "[dim]  # Display details, auto-detecting dimensions for a sprite[/dim]"
         )
         console.print(
-            "[dim]  python amiga_reader.py --display_details assets/pacman-sprite[/dim]"
+            "[dim]  amiga-reader --display_details assets/pacman-sprite[/dim]"
         )
         console.print(
             "[dim]  # Generate a PNG with a tile grid overlay, scaled 2x, to a specific directory[/dim]"
         )
         console.print(
-            "[dim]  python amiga_reader.py --generate_png assets/pacman_tiles --width 320 --height 320 --mask --sprite_width 16 --sprite_height 16 --scale 2 --output generated/[/dim]"
+            "[dim]  amiga-reader --generate_png assets/pacman_tiles --width 320 --height 320 --mask --sprite_width 16 --sprite_height 16 --scale 2 --output generated/[/dim]"
         )
         sys.exit(1)
 

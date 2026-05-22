@@ -18,8 +18,8 @@ if [ ! -f "$AMIGA_READER" ]; then
     exit 1
 fi
 
-"$AMIGA_READER" --generate_png bpl/pacman_tiles --output converted --no-interleaved --width 320 --height 320 --scale 3 --sprite_width 16 --sprite_height 16
-"$AMIGA_READER" --generate_png bpl/pacman_tiles_mask --palette bpl/pacman_tiles.pal --output converted --no-interleaved --width 320 --height 320 --bits 1 --scale 3 --sprite_width 16 --sprite_height 16
-"$AMIGA_READER" --generate_png bpl/alphanumeric --palette bpl/pacman_tiles.pal --output converted --no-interleaved --width 160 --height 160 --scale 4 --sprite_width 8 --sprite_height 8
+"$AMIGA_READER" --generate_png bpl/plowman_tiles --output converted --no-interleaved --width 320 --height 320 --scale 3 --sprite_width 16 --sprite_height 16
+"$AMIGA_READER" --generate_png bpl/plowman_tiles_mask --palette bpl/plowman_tiles.pal --output converted --no-interleaved --width 320 --height 320 --bits 1 --scale 3 --sprite_width 16 --sprite_height 16
+"$AMIGA_READER" --generate_png bpl/alphanumeric --palette bpl/plowman_tiles.pal --output converted --no-interleaved --width 160 --height 160 --scale 4 --sprite_width 8 --sprite_height 8
 
 echo "✓ Conversion complete. Output is in the 'converted' directory."

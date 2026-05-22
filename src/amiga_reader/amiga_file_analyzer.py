@@ -4,9 +4,9 @@ from rich.panel import Panel
 from rich.text import Text
 from rich import box
 
-from amiga_palette_reader import AmigaPaletteReader
-from amiga_bitplane_reader import AmigaBitplaneReader
-from amiga_png_creator import AmigaPngCreator
+from amiga_reader.amiga_palette_reader import AmigaPaletteReader
+from amiga_reader.amiga_bitplane_reader import AmigaBitplaneReader
+from amiga_reader.amiga_png_creator import AmigaPngCreator
 
 
 class AmigaFileAnalyzer:

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "amiga-reader"
+version = "1.0.0"
+description = "Amiga BPL/PAL File Analyzer & PNG Converter"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+dependencies = [
+    "rich",
+    "Pillow"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pyinstaller>=6.0.0",
+    "pytest>=7.4.0"
+]
+test = [
+    "pytest>=7.4.0"
+]
+
+[project.scripts]
+amiga-reader = "amiga_reader.amiga_reader:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
