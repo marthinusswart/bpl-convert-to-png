@@ -22,6 +22,14 @@ from amiga_reader.amiga_file_analyzer import AmigaFileAnalyzer
 from amiga_reader.amiga_bitplane_reader import AmigaBitplaneReader
 
 
+class FormGroup(Vertical):
+    """A container with a border title for grouped options."""
+    def __init__(self, border_title: str = "", **kwargs):
+        super().__init__(**kwargs)
+        self.border_title = border_title
+
+
+
 class AmigaTUIApp(App):
     """A premium Textual TUI for Amiga BPL/PAL to PNG Converter."""
 
@@ -102,12 +110,15 @@ class AmigaTUIApp(App):
         height: 1;
     }
 
+
+
     .form-group {
         background: #151825;
-        border: round #23263b;
+        border: round white;
         padding: 1;
         margin-bottom: 1;
     }
+
 
     .form-row {
         layout: horizontal;
@@ -162,8 +173,10 @@ class AmigaTUIApp(App):
         border: round #1e2133;
         padding: 1;
         height: 1fr;
+        width: 1fr;
         color: #717cbe;
     }
+
 
     Button {
         width: 1fr;
@@ -289,7 +302,7 @@ class AmigaTUIApp(App):
                     # Left Column: Basic, Dimensions, and Output
                     with Vertical(id="col1", classes="column"):
                         # Basic Info Block
-                        with Vertical(classes="form-group"):
+                        with FormGroup(border_title="BPL & PAL Source Selection", classes="form-group"):
                             with Horizontal(classes="form-row"):
                                 yield Label("Selected BPL:", classes="form-label")
                                 self.input_bpl = Input(placeholder="No BPL file selected", disabled=True, classes="form-input")
@@ -302,7 +315,7 @@ class AmigaTUIApp(App):
                                 yield self.select_pal
 
                         # Dimensions Form Block
-                        with Vertical(classes="form-group"):
+                        with FormGroup(border_title="Output Dimensions", classes="form-group"):
                             with Horizontal(classes="form-row"):
                                 yield Label("Image Width:", classes="form-label")
                                 self.input_width = Input(placeholder="e.g. 320 (must be multiple of 16)", classes="form-input")
@@ -314,7 +327,7 @@ class AmigaTUIApp(App):
                                 yield self.input_height
 
                         # Output Block
-                        with Vertical(classes="form-group"):
+                        with FormGroup(border_title="Output Configuration", classes="form-group"):
                             with Horizontal(classes="form-row"):
                                 yield Label("Output Folder:", classes="form-label")
                                 self.input_output_dir = Input(value="converted", placeholder="e.g. converted", classes="form-input")
@@ -328,7 +341,7 @@ class AmigaTUIApp(App):
                     # Right Column: Format, Scaling, and Grid Overlay
                     with Vertical(id="col2", classes="column"):
                         # Format & Bits Block
-                        with Vertical(classes="form-group"):
+                        with FormGroup(border_title="Format & Bitplane Settings", classes="form-group"):
                             with Horizontal(classes="form-row"):
                                 yield Label("Color Bits/Planes:", classes="form-label")
                                 self.select_bits = Select([(str(i), i) for i in range(1, 9)], value=5, classes="form-input")
@@ -350,7 +363,7 @@ class AmigaTUIApp(App):
                                 yield self.cb_mask
 
                         # Scaling & Grid Block
-                        with Vertical(classes="form-group"):
+                        with FormGroup(border_title="Scale & Tile Grid Overlay", classes="form-group"):
                             with Horizontal(classes="form-row"):
                                 yield Label("PNG Scale:", classes="form-label")
                                 self.select_scale = Select([("1x", 1), ("2x", 2), ("3x", 3), ("4x", 4)], value=3, classes="form-input")

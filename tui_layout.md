@@ -22,18 +22,20 @@ Below is the layout map as rendered by Textual. Dimensions are expressed as `[Wi
 | |   - height: 16                     |  +--------------------+--------------------+-------------------------------+ | |
 | |                                    |  | #col1              | #col2              | #col3                         | | |
 | |  Label(" PAL Files")               |  | [width: 60, H:100%]| [width: 60, H:100%]| [width: 1fr, height: 100%]    | | |
-| |  ListView (self.pal_list)          |  |                    |                    |                               | | |
-| |   - height: 8                      |  | .form-group        | .form-group        | #buttons-row [height: 3]      | | |
-| |                                    |  | - Selected BPL     | - Color Planes     |  - Analyze & Convert Buttons  | | |
-| |  Label(" File Details")            |  | - Select PAL       | - Palette Bits     |                               | | |
-| |  Label (self.info_label)           |  |                    | - Interleaved      | Label(" Analysis Details")    | | |
-| |   - height: 1fr                    |  | .form-group        | - Has Mask         |                               | | |
-| |                                    |  | - Image Width      |                    | #analysis-log                 | | |
-| |                                    |  | - Image Height     | .form-group        | [width: 1fr, height: 1fr]     | | |
-| |                                    |  |                    | - PNG Scale        |  (occupies remaining H)       | | |
-| |                                    |  | .form-group        | - Draw Grid        |                               | | |
-| |                                    |  | - Output Folder    | - Sprite Width     |                               | | |
-| |                                    |  | - Mask PNG         | - Sprite Height    |                               | | |
+| |  ListView (self.pal_list)          |  |                    |                    |                               || |   - height: 8                      |  | FormGroup          | FormGroup          | #buttons-row [height: 3]      | | |
+| |                                    |  | (border_title)     | (border_title)     |  - Analyze & Convert Buttons  | | |
+| |  Label(" File Details")            |  | - Selected BPL     | - Color Planes     |                               | | |
+| |  Label (self.info_label)           |  | - Select PAL       | - Palette Bits     | Label(" Analysis Details")    | | |
+| |   - height: 1fr                    |  |                    | - Interleaved      |                               | | |
+| |                                    |  | FormGroup          | - Has Mask         | #analysis-log                 | | |
+| |                                    |  | (border_title)     |                    | [width: 1fr, height: 1fr]     | | |
+| |                                    |  | - Image Width      | FormGroup          |  (occupies remaining H)       | | |
+| |                                    |  | - Image Height     | (border_title)     |                               | | |
+| |                                    |  |                    | - PNG Scale        |                               | | |
+| |                                    |  | FormGroup          | - Draw Grid        |                               | | |
+| |                                    |  | (border_title)     | - Sprite Width     |                               | | |
+| |                                    |  | - Output Folder    | - Sprite Height    |                               | | |
+| |                                    |  | - Mask PNG         |                    |                               | | |
 | |                                    |  +--------------------+--------------------+-------------------------------+ | |
 | +------------------------------------+------------------------------------------------------------------------------+ |
 +-----------------------------------------------------------------------------------------------------------------------+
@@ -58,7 +60,7 @@ Textual layouts are fully text-cell based (no pixels). Here are the exact constr
 * **Inner Components**:
   * **BPL List (`self.file_list`, ID: `#bpl-list`)**: Height is `16` cells.
   * **PAL List (`self.pal_list`)**: Height is `8` cells.
-  * **Details Panel (`self.info_label`)**: Height is `1fr` (occupies all remaining space in the sidebar, approx `15` to `25` cells depending on window height).
+  * **Details Panel (`self.info_label`, ID: `#info-panel`)**: Height is `1fr` and **Width is `1fr`** (occupies 100% of available sidebar width, perfectly aligning borders with BPL and PAL list views!).
 
 
 ---
@@ -77,9 +79,9 @@ Textual layouts are fully text-cell based (no pixels). Here are the exact constr
 * **Column 1 (`#col1`) & Column 2 (`#col2`)**:
   * **Width**: **Fixed `60` cells** (`width: 60;`).
   * **Height**: Stretches to `100%` of parent height.
-  * **Column 1 Details**: Features 3 form groups (Basic, Dimensions, Output), each constrained to a **Fixed Max-Height of `12` rows** (`max-height: 12;`) to maintain a sleek vertical alignment on tall monitors.
-  * **Column 2 Details**: Features 2 form groups (Format & Bits, Scaling & Grid), each constrained to a **Fixed Max-Height of `20` rows** (`max-height: 20;`).
-  * **Why this works beautifully**: At a fixed `60` cells, Column 1 and Column 2 remain perfectly constant and never resize horizontally. Column 3 (`#col3`) has `width: 1fr;` which receives all leftover terminal window width (`WindowWidth - 36 - 120`), and dynamically grows and shrinks when you resize the window!
+  * **Column 1 Details**: Features 3 form groups (`FormGroup` containers), each constrained to a **Fixed Max-Height of `12` rows** (`max-height: 12;`). Titles are natively integrated into the top border outlines (`border_title`).
+  * **Column 2 Details**: Features 2 form groups (`FormGroup` containers), each constrained to a **Fixed Max-Height of `20` rows** (`max-height: 20;`). Titles are natively integrated into the top border outlines (`border_title`).
+  * **Why this works beautifully**: At a fixed `60` cells, Column 1 and Column 2 remain perfectly constant and never resize horizontally. Column 3 (`#col3`) has `width: 1fr;` which receives all leftover terminal window width (`WindowWidth - 36 - 120`), and dynamically grows and shrinks when you resize the window! window!
 
 * **Column 3 (`#col3`)**:
   * **Width**: `1fr` (receives whatever width is left over: `(WindowWidth - 36) - 120`).
