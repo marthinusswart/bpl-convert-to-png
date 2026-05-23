@@ -22,6 +22,82 @@ from amiga_reader.amiga_bitplane_reader import AmigaBitplaneReader
 from amiga_reader.amiga_file_analyzer import AmigaFileAnalyzer
 
 
+def print_usage(console):
+    """Print command-line help/usage details."""
+    console.print(
+        "[yellow]Usage: amiga-reader <mode> <base_name|file_options> [options][/yellow]"
+    )
+    console.print()
+    console.print("[bold cyan]Modes:[/bold cyan]")
+    console.print(
+        "  [green]--display_details[/green]  - Display file details and analysis."
+    )
+    console.print(
+        "  [green]--generate_png[/green]     - Generate PNG from BPL and PAL files."
+    )
+    console.print()
+    console.print("[bold cyan]File Input (provide one of the following):[/bold cyan]")
+    console.print(
+        "  [green]<base_name>[/green]          - Base name for .bpl/.pal files (e.g., 'assets/image')."
+    )
+    console.print(
+        "  [green]--bpl FILE --pal FILE[/green] - Explicit paths to .bpl and .pal files (--pal or --palette)."
+    )
+    console.print()
+    console.print("[bold cyan]Required for BPL decoding:[/bold cyan]")
+    console.print(
+        "  [green]--width N, --height N[/green]  - Image dimensions. Required for PNG generation."
+    )
+    console.print(
+        "                         [dim](Optional for --display_details; will attempt auto-detection)[/dim]"
+    )
+    console.print()
+    console.print("[bold cyan]BPL/PAL Options:[/bold cyan]")
+    console.print(
+        "  [green]--bits N[/green]           - Number of color bitplanes (default: 5 → 32 colors)."
+    )
+    console.print(
+        "  [green]--mask[/green]             - BPL has a mask plane (default: off)."
+    )
+    console.print(
+        "  [green]--no-interleaved[/green]   - BPL is non-interleaved (default: is interleaved)."
+    )
+    console.print(
+        "  [green]--pal-bits 12|24[/green]   - Bit depth of the .pal file: 12 (default) or 24."
+    )
+    console.print()
+    console.print("[bold cyan]PNG Output Options:[/bold cyan]")
+    console.print(
+        "  [green]--output DIR[/green]         - Optional output directory for generated PNGs."
+    )
+    console.print(
+        "  [green]--gen_mask[/green]         - Also create a 2-color PNG of the mask."
+    )
+    console.print(
+        "  [green]--scale N[/green]          - Scale output PNG by 2, 3, or 4."
+    )
+    console.print(
+        "  [green]--sprite_width N[/green]   - Draw tile grid overlay with this tile width."
+    )
+    console.print(
+        "  [green]--sprite_height N[/green]  - Draw tile grid overlay with this tile height."
+    )
+    console.print()
+    console.print("[bold cyan]Examples:[/bold cyan]")
+    console.print(
+        "[dim]  # Display details, auto-detecting dimensions for a sprite[/dim]"
+    )
+    console.print(
+        "[dim]  amiga-reader --display_details assets/pacman-sprite[/dim]"
+    )
+    console.print(
+        "[dim]  # Generate a PNG with a tile grid overlay, scaled 2x, to a specific directory[/dim]"
+    )
+    console.print(
+        "[dim]  amiga-reader --generate_png assets/pacman_tiles --width 320 --height 320 --mask --sprite_width 16 --sprite_height 16 --scale 2 --output generated/[/dim]"
+    )
+
+
 def main():
     """Main entry point"""
     import sys
@@ -29,79 +105,18 @@ def main():
     console = Console()
 
     if len(sys.argv) < 2:
-        console.print(
-            "[yellow]Usage: amiga-reader <mode> <base_name|file_options> [options][/yellow]"
-        )
-        console.print()
-        console.print("[bold cyan]Modes:[/bold cyan]")
-        console.print(
-            "  [green]--display_details[/green]  - Display file details and analysis."
-        )
-        console.print(
-            "  [green]--generate_png[/green]     - Generate PNG from BPL and PAL files."
-        )
-        console.print()
-        console.print("[bold cyan]File Input (provide one of the following):[/bold cyan]")
-        console.print(
-            "  [green]<base_name>[/green]          - Base name for .bpl/.pal files (e.g., 'assets/image')."
-        )
-        console.print(
-            "  [green]--bpl FILE --pal FILE[/green] - Explicit paths to .bpl and .pal files (--pal or --palette)."
-        )
-        console.print()
-        console.print("[bold cyan]Required for BPL decoding:[/bold cyan]")
-        console.print(
-            "  [green]--width N, --height N[/green]  - Image dimensions. Required for PNG generation."
-        )
-        console.print(
-            "                         [dim](Optional for --display_details; will attempt auto-detection)[/dim]"
-        )
-        console.print()
-        console.print("[bold cyan]BPL/PAL Options:[/bold cyan]")
-        console.print(
-            "  [green]--bits N[/green]           - Number of color bitplanes (default: 5 → 32 colors)."
-        )
-        console.print(
-            "  [green]--mask[/green]             - BPL has a mask plane (default: off)."
-        )
-        console.print(
-            "  [green]--no-interleaved[/green]   - BPL is non-interleaved (default: is interleaved)."
-        )
-        console.print(
-            "  [green]--pal-bits 12|24[/green]   - Bit depth of the .pal file: 12 (default) or 24."
-        )
-        console.print()
-        console.print("[bold cyan]PNG Output Options:[/bold cyan]")
-        console.print(
-            "  [green]--output DIR[/green]         - Optional output directory for generated PNGs."
-        )
-        console.print(
-            "  [green]--gen_mask[/green]         - Also create a 2-color PNG of the mask."
-        )
-        console.print(
-            "  [green]--scale N[/green]          - Scale output PNG by 2, 3, or 4."
-        )
-        console.print(
-            "  [green]--sprite_width N[/green]   - Draw tile grid overlay with this tile width."
-        )
-        console.print(
-            "  [green]--sprite_height N[/green]  - Draw tile grid overlay with this tile height."
-        )
-        console.print()
-        console.print("[bold cyan]Examples:[/bold cyan]")
-        console.print(
-            "[dim]  # Display details, auto-detecting dimensions for a sprite[/dim]"
-        )
-        console.print(
-            "[dim]  amiga-reader --display_details assets/pacman-sprite[/dim]"
-        )
-        console.print(
-            "[dim]  # Generate a PNG with a tile grid overlay, scaled 2x, to a specific directory[/dim]"
-        )
-        console.print(
-            "[dim]  amiga-reader --generate_png assets/pacman_tiles --width 320 --height 320 --mask --sprite_width 16 --sprite_height 16 --scale 2 --output generated/[/dim]"
-        )
-        sys.exit(1)
+        # Launch TUI
+        try:
+            from amiga_reader.tui import main as launch_tui
+            launch_tui()
+            sys.exit(0)
+        except Exception as e:
+            console.print(f"[bold red]Error launching TUI:[/bold red] {e}", style="red")
+            sys.exit(1)
+
+    if sys.argv[1] in ("--help", "-h"):
+        print_usage(console)
+        sys.exit(0)
 
     # Parse mode argument
     mode_arg = sys.argv[1]
@@ -113,10 +128,10 @@ def main():
         console.print(
             f"[bold red]Error:[/bold red] Invalid mode '{sys.argv[1]}'", style="red"
         )
-        console.print(
-            "[yellow]Valid modes: --display_details or --generate_png[/yellow]"
-        )
+        console.print()
+        print_usage(console)
         sys.exit(1)
+
 
     bpl_file = None
     pal_file = None

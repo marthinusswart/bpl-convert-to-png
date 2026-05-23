@@ -6,15 +6,12 @@ set -e
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 cd -- "$SCRIPT_DIR"
 
-# Per README.md, the virtual environment is named 'venv'.
-# If yours is named '.venv', change the path below.
-VENV_BIN="./.venv/bin"
-AMIGA_READER="$VENV_BIN/amiga-reader"
+AMIGA_READER="./dist/amiga-reader"
 
-# Check if the python executable exists
+# Check if the standalone executable exists
 if [ ! -f "$AMIGA_READER" ]; then
     echo "Error: amiga-reader executable not found at $AMIGA_READER" >&2
-    echo "Please run 'python3 -m venv .venv' and 'pip install -e .' in the project root first." >&2
+    echo "Please run 'python build_exe.py' in the project root first." >&2
     exit 1
 fi
 
