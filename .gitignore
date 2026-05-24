@@ -4,3 +4,5 @@ __pycache__/
 dist/
 amiga_reader.egg-info/
 build/
+htmlcov/
+.coverage

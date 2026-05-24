@@ -6,10 +6,26 @@ from pathlib import Path
 
 def main():
     import shutil
+    from rich.console import Console
+    console = Console()
+
     # Ensure we execute in the project directory
     os.chdir(Path(__file__).parent)
-    
-    print("Building one-directory distribution (fast startup for dev)...")
+
+    console.print("[bold cyan]🛡️ Running test verification suite first...[/bold cyan]")
+    test_result = subprocess.call([sys.executable, "-m", "pytest"])
+    if test_result != 0:
+        console.print("\n[bold red]❌ FATAL: Test suite failed! Aborting build process.[/bold red]\n", style="red")
+        sys.exit(test_result)
+
+    console.print("\n[bold green]✓ All tests passed! Generating coverage report...[/bold green]")
+    try:
+        from amiga_reader.rich_coverage import generate_rich_report
+        generate_rich_report()
+    except Exception as e:
+        console.print(f"[bold yellow]Warning: could not generate coverage report: {e}[/bold yellow]")
+
+    console.print("[bold cyan]Building one-directory distribution (fast startup for dev)...[/bold cyan]")
     temp_dist = Path("dist/amiga-reader-dir-temp")
     target_dist = Path("dist/amiga-reader-dir")
     

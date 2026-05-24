@@ -35,6 +35,9 @@ def print_usage(console):
     console.print(
         "  [green]--generate_png[/green]     - Generate PNG from BPL and PAL files."
     )
+    console.print(
+        "  [green]cov, coverage[/green]       - Show beautiful test coverage report."
+    )
     console.print()
     console.print("[bold cyan]File Input (provide one of the following):[/bold cyan]")
     console.print(
@@ -124,6 +127,14 @@ def main():
         mode = "display"
     elif mode_arg == "--generate_png":
         mode = "generate"
+    elif mode_arg in ("cov", "coverage"):
+        try:
+            from amiga_reader.rich_coverage import main as cov_main
+            cov_main()
+            sys.exit(0)
+        except Exception as e:
+            console.print(f"[bold red]Error showing coverage:[/bold red] {e}", style="red")
+            sys.exit(1)
     else:
         console.print(
             f"[bold red]Error:[/bold red] Invalid mode '{sys.argv[1]}'", style="red"

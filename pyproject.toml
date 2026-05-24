@@ -11,13 +11,17 @@ requires-python = ">=3.8"
 license = "MIT"
 dependencies = [
     "rich",
-    "Pillow"
+    "Pillow",
+    "textual"
 ]
 
 [project.optional-dependencies]
 dev = [
     "pyinstaller>=6.0.0",
-    "pytest>=7.4.0"
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio",
+    "coverage"
 ]
 test = [
     "pytest>=7.4.0"
@@ -28,3 +32,27 @@ amiga-reader = "amiga_reader.amiga_reader:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=src/amiga_reader --cov-report=term-missing --cov-report=html"
+testpaths = [
+    "tests",
+]
+pythonpath = ["src"]
+
+[tool.coverage.run]
+branch = true
+source = ["src/amiga_reader"]
+omit = [
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+show_missing = true
